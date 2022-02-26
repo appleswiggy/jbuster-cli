@@ -8,11 +8,10 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Command(name = "jbuster-cli", description = "...",
-        mixinStandardHelpOptions = true)
+@Command(name = "jbuster-cli", description = "Directory busting CLI tool in Java.", mixinStandardHelpOptions = true)
 public class JbusterCliCommand implements Runnable {
 
-    @Option(names = {"-v", "--verbose"}, description = "...")
+    @Option(names = { "-v", "--verbose" }, description = "Print verbose.")
     boolean verbose;
 
     public static void main(String[] args) throws Exception {
