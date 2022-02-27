@@ -24,7 +24,7 @@ class JbusterCliCommandSpec extends Specification {
         PicocliRunner.run(JbusterCliCommand, ctx, args)
 
         expect:
-        baos.toString().contains('Hisdfkja')
+        baos.toString().contains('Hi!')
     }
 }
 

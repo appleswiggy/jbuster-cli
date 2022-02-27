@@ -8,20 +8,21 @@ import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Parameters;
 
-@Command(name = "jbuster-cli", description = "Directory busting CLI tool in Java.", mixinStandardHelpOptions = true)
+@Command(name = "jbuster-cli", description = "Web directory/file busting CLI tool in Java.", mixinStandardHelpOptions = true)
 public class JbusterCliCommand implements Runnable {
 
-    @Option(names = { "-v", "--verbose" }, description = "Print verbose.")
-    boolean verbose;
+    @Option(names = { "-u", "--url" }, description = "URL of the target.", required = true)
+    String url;
+
+    @Option(names = { "-w", "--wordlist" }, description = "Wordlist to be used.", required = true)
+    String wordllist;
 
     public static void main(String[] args) throws Exception {
         PicocliRunner.run(JbusterCliCommand.class, args);
     }
 
     public void run() {
-        // business logic here
-        if (verbose) {
-            System.out.println("Hi!");
-        }
+        System.out.println("URL given: " + url);
+        System.out.println("Wordlist: " + wordllist);
     }
 }
