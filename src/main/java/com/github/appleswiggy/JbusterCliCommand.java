@@ -36,6 +36,7 @@ public class JbusterCliCommand implements Runnable {
     }
 
     public void run() {
-        Banner.printBanner(url, wordlist, userAgent, threads);
+        Banner.printBanner(url, wordlist, userAgent, threads, timeout);
+        Core.process(url, wordlist, userAgent, threads, timeout);
     }
 }

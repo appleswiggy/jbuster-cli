@@ -21,6 +21,9 @@ class WorkerThread extends Thread {
     SyncMethods sm;
     int start, end;
     static ArrayList<String> words;
+    static String url;
+    static String userAgent;
+    static int timeout;
 
     WorkerThread(SyncMethods sm, int start, int end) {
         this.sm = sm;
@@ -30,7 +33,7 @@ class WorkerThread extends Thread {
     }
 
     public void run() {
-
+        System.out.println(Connect.getStatusCode(url, userAgent, timeout));
     }
 }
 
@@ -50,6 +53,11 @@ public class Core {
             myReader.close();
             WorkerThread.words = words;
 
+            // fix
+            WorkerThread.url = url;
+            WorkerThread.userAgent = userAgent;
+            WorkerThread.timeout = timeout;
+
             int splitter = words.size() / threads;
             SyncMethods sm = new SyncMethods();
             WorkerThread[] workerThreads = new WorkerThread[threads];
@@ -57,12 +65,17 @@ public class Core {
             for (int i = 0; i < threads; ++i) {
                 if (i == 0) {
                     workerThreads[i] = new WorkerThread(sm, 0, splitter);
-                }
-                else if (i == threads - 1) {
+                } else if (i == threads - 1) {
                     workerThreads[i] = new WorkerThread(sm, splitter * i, words.size());
+                } else {
+                    workerThreads[i] = new WorkerThread(sm, splitter * i, splitter * (i + 1));
                 }
-                else {
-                    
+            }
+            for (int i = 0; i < threads; ++i) {
+                try {
+                    workerThreads[i].join();
+                } catch (InterruptedException ie) {
+                    System.out.println("Interrupted exception. ");
                 }
             }
 
