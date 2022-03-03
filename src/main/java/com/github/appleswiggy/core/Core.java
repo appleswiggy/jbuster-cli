@@ -5,8 +5,15 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import com.github.appleswiggy.util.Global;
+
 class SyncMethods {
-    int completed = 0;
+    private int completed = 0;
+    private int total;
+
+    SyncMethods(int total) {
+        this.total = total;
+    }
 
     String getCounter() {
         return Integer.toString(completed);
@@ -14,6 +21,7 @@ class SyncMethods {
 
     synchronized void incrementCounter() {
         completed++;
+        System.out.printf("\rProgress: %d/%d (%.2f%%)", completed, total, (float) (completed * 100) / total);
     }
 }
 
@@ -33,7 +41,26 @@ class WorkerThread extends Thread {
     }
 
     public void run() {
-        System.out.println(Connect.getStatusCode(url, userAgent, timeout));
+        if (start != 0 || end != 0) {
+            for (int i = start; i < end; ++i) {
+                sm.incrementCounter();
+
+                String newURL = url + "/" + words.get(i);
+                int statusCode = Connect.getStatusCode(newURL, userAgent, timeout);
+
+                if (statusCode == 200) {
+                    System.out.printf("\r/%s (Status: %d)                                  \n", words.get(i),
+                            statusCode);
+                }
+                if (i == end - 1) {
+
+                    // just for test
+                    System.out.printf("\r%s\n", Global.partitioner);
+
+                }
+
+            }
+        }
     }
 }
 
@@ -59,7 +86,7 @@ public class Core {
             WorkerThread.timeout = timeout;
 
             int splitter = words.size() / threads;
-            SyncMethods sm = new SyncMethods();
+            SyncMethods sm = new SyncMethods(words.size());
             WorkerThread[] workerThreads = new WorkerThread[threads];
 
             for (int i = 0; i < threads; ++i) {
