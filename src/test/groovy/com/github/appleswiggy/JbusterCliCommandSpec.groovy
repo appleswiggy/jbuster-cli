@@ -20,11 +20,11 @@ class JbusterCliCommandSpec extends Specification {
         ByteArrayOutputStream baos = new ByteArrayOutputStream()
         System.setOut(new PrintStream(baos))
 
-        String[] args = ['-v'] as String[]
+        String[] args = ['-u', 'https://google.com', '-w', '/usr/share/wordlists/common.txt', '-U', 'abcda'] as String[]
         PicocliRunner.run(JbusterCliCommand, ctx, args)
 
         expect:
-        baos.toString().contains('Hi!')
+        baos.toString().contains('abcda')
     }
 }
 
