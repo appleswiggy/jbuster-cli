@@ -5,36 +5,19 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import com.github.appleswiggy.util.Global;
-
-class SyncMethods {
-    private int completed = 0;
-    private int total;
-
-    SyncMethods(int total) {
-        this.total = total;
-    }
-
-    String getCounter() {
-        return Integer.toString(completed);
-    }
-
-    synchronized void incrementCounter() {
-        completed++;
-        System.out.printf("\rProgress: %d/%d (%.2f%%)", completed, total, (float) (completed * 100) / total);
-    }
-}
+import com.github.appleswiggy.util.Progress;
 
 class WorkerThread extends Thread {
-    SyncMethods sm;
-    int start, end;
+    private Progress progress;
+    private int start, end;
+
     static ArrayList<String> words;
     static String url;
     static String userAgent;
     static int timeout;
 
-    WorkerThread(SyncMethods sm, int start, int end) {
-        this.sm = sm;
+    WorkerThread(Progress progress, int start, int end) {
+        this.progress = progress;
         this.start = start;
         this.end = end;
         this.start();
@@ -43,20 +26,16 @@ class WorkerThread extends Thread {
     public void run() {
         if (start != 0 || end != 0) {
             for (int i = start; i < end; ++i) {
-                sm.incrementCounter();
+                progress.printProgress();
 
                 String newURL = url + "/" + words.get(i);
                 int statusCode = Connect.getStatusCode(newURL, userAgent, timeout);
 
                 if (statusCode == 200) {
-                    System.out.printf("\r/%s (Status: %d)                                  \n", words.get(i),
-                            statusCode);
+                    progress.printStatus(words.get(i), statusCode);
                 }
                 if (i == end - 1) {
-
-                    // just for test
-                    System.out.printf("\r%s\n", Global.partitioner);
-
+                    progress.printEmptyline();
                 }
 
             }
@@ -86,16 +65,16 @@ public class Core {
             WorkerThread.timeout = timeout;
 
             int splitter = words.size() / threads;
-            SyncMethods sm = new SyncMethods(words.size());
+            Progress progress = new Progress(words.size());
             WorkerThread[] workerThreads = new WorkerThread[threads];
 
             for (int i = 0; i < threads; ++i) {
                 if (i == 0) {
-                    workerThreads[i] = new WorkerThread(sm, 0, splitter);
+                    workerThreads[i] = new WorkerThread(progress, 0, splitter);
                 } else if (i == threads - 1) {
-                    workerThreads[i] = new WorkerThread(sm, splitter * i, words.size());
+                    workerThreads[i] = new WorkerThread(progress, splitter * i, words.size());
                 } else {
-                    workerThreads[i] = new WorkerThread(sm, splitter * i, splitter * (i + 1));
+                    workerThreads[i] = new WorkerThread(progress, splitter * i, splitter * (i + 1));
                 }
             }
             for (int i = 0; i < threads; ++i) {
