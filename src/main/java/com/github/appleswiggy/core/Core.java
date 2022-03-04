@@ -6,15 +6,12 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 import com.github.appleswiggy.util.Progress;
+import com.github.appleswiggy.util.Global;
 
 class WorkerThread extends Thread {
     private Progress progress;
     private int start, end;
-
     static ArrayList<String> words;
-    static String url;
-    static String userAgent;
-    static int timeout;
 
     WorkerThread(Progress progress, int start, int end) {
         this.progress = progress;
@@ -28,25 +25,21 @@ class WorkerThread extends Thread {
             for (int i = start; i < end; ++i) {
                 progress.printProgress();
 
-                String newURL = url + "/" + words.get(i);
-                int statusCode = Connect.getStatusCode(newURL, userAgent, timeout);
+                String newURL = Global.url + "/" + words.get(i);
+                int statusCode = Connect.getStatusCode(newURL);
 
                 if (statusCode == 200) {
                     progress.printStatus(words.get(i), statusCode);
                 }
-                if (i == end - 1) {
-                    progress.printEmptyline();
-                }
-
             }
         }
     }
 }
 
 public class Core {
-    public static void process(String url, String wordlist, String userAgent, int threads, int timeout) {
+    public static void process() {
         try {
-            File myObj = new File(wordlist);
+            File myObj = new File(Global.wordlist);
             Scanner myReader = new Scanner(myObj);
             ArrayList<String> words = new ArrayList<String>();
 
@@ -59,31 +52,28 @@ public class Core {
             myReader.close();
             WorkerThread.words = words;
 
-            // fix
-            WorkerThread.url = url;
-            WorkerThread.userAgent = userAgent;
-            WorkerThread.timeout = timeout;
-
-            int splitter = words.size() / threads;
+            int splitter = words.size() / Global.threads;
             Progress progress = new Progress(words.size());
-            WorkerThread[] workerThreads = new WorkerThread[threads];
+            WorkerThread[] workerThreads = new WorkerThread[Global.threads];
 
-            for (int i = 0; i < threads; ++i) {
+            for (int i = 0; i < Global.threads; ++i) {
                 if (i == 0) {
                     workerThreads[i] = new WorkerThread(progress, 0, splitter);
-                } else if (i == threads - 1) {
+                } else if (i == Global.threads - 1) {
                     workerThreads[i] = new WorkerThread(progress, splitter * i, words.size());
                 } else {
                     workerThreads[i] = new WorkerThread(progress, splitter * i, splitter * (i + 1));
                 }
             }
-            for (int i = 0; i < threads; ++i) {
+            for (int i = 0; i < Global.threads; ++i) {
                 try {
                     workerThreads[i].join();
                 } catch (InterruptedException ie) {
                     System.out.println("Interrupted exception. ");
                 }
             }
+
+            progress.printEmptyline();
 
         } catch (FileNotFoundException e) {
             System.out.println("An error occurred while opening the wordlist.");

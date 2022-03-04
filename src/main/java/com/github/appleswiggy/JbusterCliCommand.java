@@ -23,7 +23,7 @@ public class JbusterCliCommand implements Runnable {
     String wordlist;
 
     @Option(names = { "-U", "--user-agent" }, description = "User-Agent HTTP header")
-    String userAgent = Global.userAgent;
+    String userAgent = "Jbuster/1.0";
 
     @Option(names = { "-T", "--threads" }, description = "Number of threads to use.")
     int threads = 10;
@@ -36,7 +36,13 @@ public class JbusterCliCommand implements Runnable {
     }
 
     public void run() {
-        Banner.printBanner(url, wordlist, userAgent, threads, timeout);
-        Core.process(url, wordlist, userAgent, threads, timeout);
+        Global.url = url;
+        Global.wordlist = wordlist;
+        Global.userAgent = userAgent;
+        Global.threads = threads;
+        Global.timeout = timeout;
+
+        Banner.printBanner();
+        Core.process();
     }
 }
