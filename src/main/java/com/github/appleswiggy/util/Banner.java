@@ -24,4 +24,8 @@ public class Banner {
         System.out.println(Global.partitioner);
 
     }
+
+    public static void errorBanner() {
+
+    }
 }
